@@ -60,7 +60,8 @@ app.get('/login', (req, res) => {
         //redirect if user is already logged in
         res.redirect('/protectedRoute');
     } else {
-        let loginHTML = `<code>app.get(\'\/login\')</code>
+        let loginHTML = `
+            <code>app.get(\'\/login\')</code>
             <br />
             <img src="/mmdoor.gif" alt="GIF: Mickey Mouse trying to open door" />
             <h1> Login </h1>
@@ -103,7 +104,6 @@ app.post('/login', async (req, res) => {
         req.session.GLOBAL_AUTHENTICATED = true;
         req.session.loggedUsername = req.body.username;
         req.session.loggedPassword = userresult.password;
-        // res.send('<code>app.post(\'/login\')</code>: You are logged in');
         console.log("app.post(\'\/login\'): Current session cookie:", req.cookies["connect.sid"])
         res.redirect('/protectedRoute');
     } else {
@@ -130,7 +130,6 @@ const authenticatedOnly = (req, res, next) => {
     }
     next();
 };
-
 
 
 // app.use(['/protectedRoute', '/protectedRouteForAdminsOnly'], authenticatedOnly);
@@ -162,7 +161,6 @@ app.get('/protectedRoute', async (req, res) => {
 });
 
 
-
 const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => {
     // if username and password are correct:
     const result = await usersModel.findOne({
@@ -179,7 +177,7 @@ const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => 
             <input type="button" value="Back" onclick="window.history.back()" />
             <br />
             `
-        res.send(nonAdminHTML);
+        return res.send(nonAdminHTML);
     }
     next();
 };
