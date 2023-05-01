@@ -32,39 +32,45 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }))
 app.use(express.static('public'));
 
+
 app.get(['/', '/home'], (req, res) => {
-    console.log("\'\/\': Current session cookie:", req.cookies)
     if (req.session.GLOBAL_AUTHENTICATED) {
         //redirect if user is already logged in
         res.redirect('/protectedRoute');
-    }
-    let homeHTML = `
-        <h1>\'\/\' Home Page</h1>
+    } else {
+        console.log("\'\/\', \'\/home\': Current session cookie:", req.cookies["connect.sid"])
+        
+        let homeHTML = `
+        <code>app.get(\'/\', \'\/home\')</code>
+        <h1>Landing Page</h1>
+        <img src="./5m5h.gif" alt="GIF: Chilling at a bar scene - night" style="width: 50vh;" />
         <h2>Welcome! Please login to continue.</h2>
         <form action="/login" method="GET">
         <input type="submit" value="Login" />
         </form>
         `
-    res.send(`<code>app.get(\'/\')</code>: ${homeHTML}`);
+        res.send(homeHTML);
+    }
 })
 
 
 app.get('/login', (req, res) => {
-    console.log("\'\/login\': Current session cookie-id:", req.cookies)
+    console.log("app.get(\'\/login\'): Current session cookie-id:", req.cookies["connect.sid"])
     if (req.session.GLOBAL_AUTHENTICATED) {
         //redirect if user is already logged in
         res.redirect('/protectedRoute');
     } else {
-        res.send(`<code>app.get(\'\/login\')</code>
-        <br />
-        <img src="./mmdoor.gif" alt="GIF: Mickey Mouse trying to open door" />
-        <h1> Login </h1>
-        <form action="/login" method="POST">
-        <input type="text" name="username" placeholder="username" />
-        <input type="password" name="password" placeholder="password" />
-        <input type="submit" value="Login" />
-        </form>
-    `);
+        let loginHTML = `<code>app.get(\'\/login\')</code>
+            <br />
+            <img src="./mmdoor.gif" alt="GIF: Mickey Mouse trying to open door" />
+            <h1> Login </h1>
+            <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="username" />
+            <input type="password" name="password" placeholder="password" />
+            <input type="submit" value="Login" />
+            </form>
+            `
+        res.send(loginHTML);
     }
 })
 
@@ -78,7 +84,7 @@ app.get('/logout', function (req, res, next) {
 
     req.session.save(function (err) {
         if (err) next(err)
-        req.session.regenerate(function (err) {
+        req.session.destroy(function (err) {
             if (err) next(err)
             res.redirect('/')
         })
@@ -98,7 +104,7 @@ app.post('/login', async (req, res) => {
         req.session.loggedUsername = req.body.username;
         req.session.loggedPassword = userresult.password;
         // res.send('<code>app.post(\'/login\')</code>: You are logged in');
-        console.log("app.post(\'\/login\'): Current session cookie:", req.cookies)
+        console.log("app.post(\'\/login\'): Current session cookie:", req.cookies["connect.sid"])
         res.redirect('/protectedRoute');
     } else {
         let loginFailHTML = `
@@ -111,12 +117,9 @@ app.post('/login', async (req, res) => {
             <br />
             <a href="/">Home</a>
         `
+        console.log("app.post(\'\/login\'): Current session cookie-id:", req.cookies["connect.sid"])
         res.send(loginFailHTML);
-        console.log("Current session cookie-id:", req.cookies)
     }
-
-
-
 });
 
 
@@ -130,21 +133,31 @@ const authenticatedOnly = (req, res, next) => {
 
 
 
-app.use(['/protectedRoute', '/protectedRouteForAdminsOnly'], authenticatedOnly);
-app.get('/protectedRoute', (req, res) => {
+// app.use(['/protectedRoute', '/protectedRouteForAdminsOnly'], authenticatedOnly);
+app.use('/protectedRoute', authenticatedOnly);
+app.get('/protectedRoute', async (req, res) => {
     const randomImageNumber = Math.floor(Math.random() * 3) + 1;
     const imageName = `00${randomImageNumber}.gif`;
+    let checkUserType = await usersModel.findOne({
+        username: req.session.loggedUsername
+    });
+
+    if (checkUserType?.type == 'administrator') {
+        var checkAdminA = `<input type="button" value="Admin Page" onclick="window.location.href='/protectedRouteForAdminsOnly'" />`
+    } else {
+        var checkAdminA = ``
+    }
+
     let protectedRouteHTML = `
         <code>app.get(\'\/protectedRoute\')</code>
-        <h1>/protectedRoute</h1>
-        <p>Login successful</p>
-        <p>Welcome, ${req.session.loggedUsername}!</p>
+        <h1>Home Page - Logged In</h1>
+        <p>Welcome, <strong>${req.session.loggedUsername}</strong>! ${checkAdminA}</p>
         <img src="./${imageName}" alt="random welcome image" />
         <br />
         <br />
         <input type="button" value="Logout" onclick="window.location.href='/logout'" />
         `;
-    console.log("\/protectedRoute: Current session cookie:", req.cookies)
+    console.log("app.get\'\/protectedRoute\': Current session cookie:", req.cookies["connect.sid"])
     res.send(protectedRouteHTML);
 });
 
@@ -159,8 +172,14 @@ const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => 
     console.log('result of findOne(): ', result);
     // console.log(result);
     if (result?.type != 'administrator') {
-        res.send('<h1> You are not an administrator! </h1>');
-        // res.status(401).json({ error: 'not authenticated' });
+        let nonAdminHTML = `
+            <code>app.use(\'/protectedRouteForAdminsOnly\', protectedRouteForAdminsOnlyMiddlewareFunction)</code>
+            <h1>Sorry, you are not an administrator.</h1>
+            <br />
+            <input type="button" value="Back" onclick="window.history.back()" />
+            <br />
+            `
+        res.send(nonAdminHTML);
     }
     next();
 };
@@ -168,9 +187,17 @@ const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => 
 
 app.use('/protectedRouteForAdminsOnly', protectedRouteForAdminsOnlyMiddlewareFunction);
 app.get('/protectedRouteForAdminsOnly', (req, res) => {
-    console.log("Current session cookie:", req.cookies)
-    return res.send(`<h1> protectedRouteForAdminsOnly </h1>
-    <p>Welcome Administrator ${req.session.loggedUsername}</p>`);
+    let adminHTML = `
+        <h1>Admins Page</h1>
+        <p>Welcome Administrator <strong>${req.session.loggedUsername}</strong></p>
+        <img src="./lounge.gif" alt="GIF: bar lounge" style="width: 50vh;" />
+        <br />
+        <br />
+        <input type="button" value="Back" onclick="window.history.back()" />
+        `
+    console.log("app.get(\'\/protectedRouteForAdminsOnly\'): Current session cookie:");
+    console.log(req.cookies["connect.sid"]);
+    return res.send(adminHTML);
 });
 
 
@@ -179,6 +206,7 @@ app.use((req, res, next) => {
         <h1>404: Sorry can't find that!</h1>
         <input type="button" value="Back" onclick="window.history.back()" />`
     res.status(404).send(errorHTML)
+    console.log("404 Page: Current session cookie:", req.cookies["connect.sid"]);
 })
 
 module.exports = app;
