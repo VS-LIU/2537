@@ -188,6 +188,8 @@ const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => 
 app.use('/protectedRouteForAdminsOnly', protectedRouteForAdminsOnlyMiddlewareFunction);
 app.get('/protectedRouteForAdminsOnly', (req, res) => {
     let adminHTML = `
+        <code>app.get(\'\/protectedRouteForAdminsOnly\')</code>
+        <br />
         <h1>Admins Page</h1>
         <p>Welcome Administrator <strong>${req.session.loggedUsername}</strong></p>
         <img src="./lounge.gif" alt="GIF: bar lounge" style="width: 50vh;" />
