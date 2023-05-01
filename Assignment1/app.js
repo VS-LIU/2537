@@ -43,7 +43,7 @@ app.get(['/', '/home'], (req, res) => {
         let homeHTML = `
         <code>app.get(\'/\', \'\/home\')</code>
         <h1>Landing Page</h1>
-        <img src="/5m5h.gif" alt="GIF: Chilling at a bar scene - night" style="width: 50vh;" />
+        <img src="5m5h.gif" alt="GIF: Chilling at a bar scene - night" style="width: 50vh;" />
         <h2>Welcome! Please login to continue.</h2>
         <form action="/login" method="GET">
         <input type="submit" value="Login" />
@@ -62,7 +62,7 @@ app.get('/login', (req, res) => {
     } else {
         let loginHTML = `<code>app.get(\'\/login\')</code>
             <br />
-            <img src="./mmdoor.gif" alt="GIF: Mickey Mouse trying to open door" />
+            <img src="mmdoor.gif" alt="GIF: Mickey Mouse trying to open door" />
             <h1> Login </h1>
             <form action="/login" method="POST">
             <input type="text" name="username" placeholder="username" />
@@ -152,7 +152,7 @@ app.get('/protectedRoute', async (req, res) => {
         <code>app.get(\'\/protectedRoute\')</code>
         <h1>Home Page - Logged In</h1>
         <p>Welcome, <strong>${req.session.loggedUsername}</strong>! ${checkAdminA}</p>
-        <img src="./${imageName}" alt="random welcome image" />
+        <img src="${imageName}" alt="random welcome image" />
         <br />
         <br />
         <input type="button" value="Logout" onclick="window.location.href='/logout'" />
@@ -192,7 +192,7 @@ app.get('/protectedRouteForAdminsOnly', (req, res) => {
         <br />
         <h1>Admins Page</h1>
         <p>Welcome Administrator <strong>${req.session.loggedUsername}</strong></p>
-        <img src="./lounge.gif" alt="GIF: bar lounge" style="width: 50vh;" />
+        <img src="lounge.gif" alt="GIF: bar lounge" style="width: 50vh;" />
         <br />
         <br />
         <input type="button" value="Back" onclick="window.history.back()" />
