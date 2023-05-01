@@ -9,6 +9,8 @@ const usersModel = require('./models/w1users.js');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
+const ejs = require('ejs');
+app.set('view engine', 'ejs');
 
 
 app.use(session({
@@ -100,7 +102,7 @@ app.post('/login', async (req, res) => {
     console.log(`Password entered: ${req.body.password}`)
     console.log(userresult)
     // if password is not null and the password matches the hashed password in the database
-    if (userresult && bcrypt.compareSync(req.body.password, userresult.password)) {
+    if (await userresult && bcrypt.compareSync(req.body.password, userresult.password)) {
         req.session.GLOBAL_AUTHENTICATED = true;
         req.session.loggedUsername = req.body.username;
         req.session.loggedPassword = userresult.password;
@@ -147,17 +149,14 @@ app.get('/protectedRoute', async (req, res) => {
         var checkAdminA = ``
     }
 
-    let protectedRouteHTML = `
-        <code>app.get(\'\/protectedRoute\')</code>
-        <h1>Home Page - Logged In</h1>
-        <p>Welcome, <strong>${req.session.loggedUsername}</strong>! ${checkAdminA}</p>
-        <img src="/${imageName}" alt="random welcome image" />
-        <br />
-        <br />
-        <input type="button" value="Logout" onclick="window.location.href='/logout'" />
-        `;
+    // let protectedRouteHTML = ``;
     console.log("app.get\'\/protectedRoute\': Current session cookie:", req.cookies["connect.sid"])
-    res.send(protectedRouteHTML);
+    // res.send(protectedRouteHTML);
+    res.render('protectedRoute.ejs', {
+        "username": req.session.loggedUsername,
+        "image": imageName,
+        "adminBtn": checkAdminA
+        })
 });
 
 
