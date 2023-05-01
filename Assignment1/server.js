@@ -13,8 +13,8 @@ async function main() {
   
 
   console.log(`server.js: Successfully connected to MongoDB Database.`);
-  // app.listen(process.env.PORT || 3000, () => {
-  app.listen(3000, () => {
+  app.listen(process.env.PORT || 3000, () => {
+  // app.listen(3000, () => {
     console.log(`server.js: Server is running on port ${process.env.PORT} and listening for HTTP requests`);
   })
   // Check if the connection is successful by checking the value of mongoose.connection.readyState
