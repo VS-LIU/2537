@@ -9,7 +9,7 @@ async function main() {
   // await mongoose.connect('mongodb://127.0.0.1:27017/test');
   // await mongoose.connect('mongodb://127.0.0.1:27017/comp2537w1');
   // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
-  await mongoose.connect(`mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@cluster1.ncanyuw.mongodb.net/comp2537w1?retryWrites=true&w=majority`);
+  await mongoose.connect(`mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@${process.env.ATLAS_DB_HOST}/comp2537w1?retryWrites=true&w=majority`);
   
 
   console.log(`server.js: Successfully connected to MongoDB Database.`);
