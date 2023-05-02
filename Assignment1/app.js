@@ -45,7 +45,7 @@ app.get(['/', '/home'], (req, res) => {
         let homeHTML = `
         <code>app.get(\'/\', \'\/home\')</code>
         <h1>Landing Page</h1>
-        <img src="5m5h.gif" alt="GIF: Chilling at a bar scene - night" style="width: 50vh;" />
+        <img src="5m5h.gif" alt="GIF: Chilling at a bar scene - night" style="width: 50vw;" />
         <h2>Welcome! Please login to continue.</h2>
         <form action="/createUser" method="GET">
         <input type="submit" value="Register" />
