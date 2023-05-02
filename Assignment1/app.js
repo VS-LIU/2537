@@ -1,5 +1,5 @@
 // 2023-04-24
-// Lecture by Nabil
+// Assignment 1 - Victor Liu (#A00971668, Set F)
 const express = require('express');
 const app = express();
 require('dotenv').config();
@@ -9,7 +9,7 @@ const usersModel = require('./models/w1users.js');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
-
+const Joi = require('joi');
 
 app.use(session({
     secret: "The secret a random unique string key used to authenticate a session. It is stored in an environment variable and can’t be exposed to the public.",
@@ -23,7 +23,7 @@ app.use(session({
         },
         dbName: 'sessionStoreDB',
         collectionName: 'sessions',
-        ttl: 60 * 60 * 24, // 1 day
+        ttl: 60 * 60 * 1, // 1 hour
         autoRemove: 'interval',
         autoRemoveInterval: 10 // In minutes. Default
     })
@@ -87,7 +87,23 @@ app.post('/createUser', async (req, res) => {
     const userresult = await usersModel.findOne({
         username: req.body.username
     })
-    if (userresult) {
+    if (req.body.username == "") {
+        let createUserFailHTML = `
+            <code>app.post(\'/createUser\')</code>
+            <br />
+            <h3>Error: Username is empty - Please try again</h3>
+            <input type="button" value="Try Again" onclick="window.location.href='/createUser'" />
+            `
+        res.send(createUserFailHTML)
+    } else if (req.body.password == "") {
+        let createUserFailHTML = `
+            <code>app.post(\'/createUser\')</code>
+            <br />
+            <h3>Error: Password is empty - Please try again</h3>
+            <input type="button" value="Try Again" onclick="window.location.href='/createUser'" />
+            `
+        res.send(createUserFailHTML)
+    } else if (userresult) {
         let createUserFailHTML = `
             <code>app.post(\'/createUser\')</code>
             <br />
@@ -112,6 +128,22 @@ app.post('/createUser', async (req, res) => {
 
 app.get('/login', (req, res) => {
     console.log("app.get(\'\/login\'): Current session cookie-id:", req.cookies)
+
+    const schema = Joi.object({
+        username: Joi.string()
+            .alphanum()
+            .min(3)
+            .max(30)
+            .required(),
+
+        password: Joi.string()
+            .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+    })
+    try {
+        const value = await schema.validateAsync({ username: 'abc', birth_year: 1994 });
+    }
+    catch (err) { }
+
     if (req.session.GLOBAL_AUTHENTICATED) {
         //redirect if user is already logged in
         res.redirect('/protectedRoute');
