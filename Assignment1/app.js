@@ -12,11 +12,14 @@ const bcrypt = require('bcrypt');
 const Joi = require('joi');
 
 app.use(session({
-    secret: "The secret a random unique string key used to authenticate a session. It is stored in an environment variable and can’t be exposed to the public.",
+    secret: process.env.NODE_SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: 'mongodb+srv://vsctl95:MbabXSUUycA1FYOE@cluster1.ncanyuw.mongodb.net/?retryWrites=true&w=majority',
+        mongoUrl: `mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@${process.env.ATLAS_DB_HOST}/?retryWrites=true&w=majority`,
+        crypto: {
+            secret: process.env.MONGO_SESSION_SECRET,
+        },
         mongoOptions: {
             useNewUrlParser: true,
             useUnifiedTopology: true,
@@ -24,14 +27,13 @@ app.use(session({
         dbName: 'sessionStoreDB',
         collectionName: 'sessions',
         ttl: 60 * 60 * 1, // 1 hour
-        autoRemove: 'interval',
-        autoRemoveInterval: 10 // In minutes. Default
+        autoRemove: 'native'
     })
 }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }))
 app.use(express.static(__dirname + "/public"));
-
+app.use(express.json())
 
 app.get(['/', '/home'], (req, res) => {
     if (req.session.GLOBAL_AUTHENTICATED) {
@@ -59,13 +61,11 @@ app.get(['/', '/home'], (req, res) => {
 app.get('/createUser', (req, res) => {
     console.log("app.get(\'\/createUser\'): Current session cookie-id:", req.cookies)
     if (req.session.GLOBAL_AUTHENTICATED) {
-        //redirect if user is already logged in
         res.redirect('/protectedRoute');
     } else {
         let createUserHTML = `
         <code>app.get(\'\/createUser\')</code>
         <br />
-        <img src="/mmdoor.gif" alt="GIF: Mickey Mouse trying to open door" />
         <h1> Create User </h1>
         <form action="/createUser" method="POST">
         <label for="username">Username</label>
@@ -84,26 +84,67 @@ app.get('/createUser', (req, res) => {
 })
 
 app.post('/createUser', async (req, res) => {
-    const userresult = await usersModel.findOne({
-        username: req.body.username
+    const schemaCreateUser = Joi.object({
+        username: Joi.string()
+            .alphanum()
+            .max(30)
+            .trim()
+            .min(1)
+            .strict()
+            .required(),
+        password: Joi.string()
+            .required()
     })
-    if (req.body.username == "") {
-        let createUserFailHTML = `
+    try {
+        const resultUsername = await schemaCreateUser.validateAsync(req.body);
+    } catch (err) {
+        // if catching username error :
+        if (err.details[0].context.key == "username") {
+            console.log(err.details)
+            let createUserFailHTML = `
             <code>app.post(\'/createUser\')</code>
             <br />
-            <h3>Error: Username is empty - Please try again</h3>
+            <h3>Error: Username can only contain letters and numbers and must not be empty - Please try again</h3>
             <input type="button" value="Try Again" onclick="window.location.href='/createUser'" />
             `
-        res.send(createUserFailHTML)
-    } else if (req.body.password == "") {
-        let createUserFailHTML = `
+            return res.send(createUserFailHTML)
+        }
+        // if catching password error :
+        if (err.details[0].context.key == "password") {
+            console.log(err.details)
+            let createUserFailHTML = `
             <code>app.post(\'/createUser\')</code>
             <br />
             <h3>Error: Password is empty - Please try again</h3>
             <input type="button" value="Try Again" onclick="window.location.href='/createUser'" />
             `
-        res.send(createUserFailHTML)
-    } else if (userresult) {
+            return res.send(createUserFailHTML)
+        }
+    }
+    // if no errors, continue to create user
+
+
+    const userresult = await usersModel.findOne({
+        username: req.body.username
+    })
+    // if (req.body.username == "") {
+    //     let createUserFailHTML = `
+    //         <code>app.post(\'/createUser\')</code>
+    //         <br />
+    //         <h3>Error: Username is empty - Please try again</h3>
+    //         <input type="button" value="Try Again" onclick="window.location.href='/createUser'" />
+    //         `
+    //     res.send(createUserFailHTML)
+    // } else if (req.body.password == "") {
+    //     let createUserFailHTML = `
+    //         <code>app.post(\'/createUser\')</code>
+    //         <br />
+    //         <h3>Error: Password is empty - Please try again</h3>
+    //         <input type="button" value="Try Again" onclick="window.location.href='/createUser'" />
+    //         `
+    //     res.send(createUserFailHTML)
+    // } else if (userresult) {
+    if (userresult) {
         let createUserFailHTML = `
             <code>app.post(\'/createUser\')</code>
             <br />
@@ -128,22 +169,6 @@ app.post('/createUser', async (req, res) => {
 
 app.get('/login', (req, res) => {
     console.log("app.get(\'\/login\'): Current session cookie-id:", req.cookies)
-
-    const schema = Joi.object({
-        username: Joi.string()
-            .alphanum()
-            .min(3)
-            .max(30)
-            .required(),
-
-        password: Joi.string()
-            .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
-    })
-    try {
-        const value = await schema.validateAsync({ username: 'abc', birth_year: 1994 });
-    }
-    catch (err) { }
-
     if (req.session.GLOBAL_AUTHENTICATED) {
         //redirect if user is already logged in
         res.redirect('/protectedRoute');
@@ -165,12 +190,27 @@ app.get('/login', (req, res) => {
 
 
 app.post('/login', async (req, res) => {
+
+    const schema = Joi.object({
+        username: Joi.string()
+            .required(),
+        password: Joi.string()
+            .required()
+    })
+    try {
+        const value = await schema.validateAsync({ username: req.body.username, password: req.body.password });
+    }
+    catch (err) {
+        console.log(err.details);
+        console.log("Username or password is invalid")
+        return
+    }
+
     const userresult = await usersModel.findOne({
         username: req.body.username
     });
     console.log(`Username entered: ${req.body.username}`)
     console.log(`Password entered: ${req.body.password}`)
-    console.log(userresult)
     // if password is not null and the password matches the hashed password in the database
     if (userresult && bcrypt.compareSync(req.body.password, userresult.password)) {
         req.session.GLOBAL_AUTHENTICATED = true;
@@ -182,7 +222,7 @@ app.post('/login', async (req, res) => {
         let loginFailHTML = `
         <code>app.post(\'/login\')</code> 
         <br />
-        <h3>Invalid username or password/h3>
+        <h3>Invalid username or password</h3>
         <br />
         <br />
         <input type="button" value="Try Again" onclick="window.history.back()" />
@@ -214,7 +254,14 @@ app.get('/logout', function (req, res, next) {
 // only for authenticated users
 const authenticatedOnly = (req, res, next) => {
     if (!req.session.GLOBAL_AUTHENTICATED) {
-        return res.status(401).json({ error: 'not authenticated' });
+        let notLoggedInHTML = `
+        <code>app.use(\'/protectedRoute\')</code>
+        <br />
+        <h3>Error: You are not logged in</h3>
+        <input type="button" value="Login" onclick="window.location.href='/login'" />
+        <input type="button" value="Create User" onclick="window.location.href='/createUser'" />
+        `
+        return res.send(notLoggedInHTML);
     }
     next();
 };
@@ -237,7 +284,7 @@ app.get('/protectedRoute', async (req, res) => {
 
     let protectedRouteHTML = `
         <code>app.get(\'\/protectedRoute\')</code>
-        <h1>Home Page - Logged In</h1>
+        <h1>Members Page - Logged In</h1>
         <p>Welcome, <strong>${req.session.loggedUsername}</strong>! ${checkAdminA}</p>
         <img src="/${imageName}" alt="random welcome image" />
         <br />
