@@ -158,9 +158,13 @@ app.post('/createUser', async (req, res) => {
             username: req.body.username,
             password: hashedPassword
         })
+        req.session.GLOBAL_AUTHENTICATED = true;
+        req.session.loggedUsername = req.body.username;
+        req.session.loggedPassword = hashedPassword;
         await newUser.save();
         console.log(`New user created: ${newUser}`);
-        res.redirect('/login');
+        res.redirect('/protectedRoute');
+        // res.redirect('/login');
     }
 })
 
