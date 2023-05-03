@@ -22,6 +22,6 @@ const usersSchema = new mongoose.Schema({
     ]
 });
 
-const usersModel = mongoose.model('w1user', usersSchema)
+const usersModel = mongoose.model('w2user', usersSchema)
 
 module.exports = usersModel;
