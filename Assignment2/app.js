@@ -1,22 +1,25 @@
 // 2023-04-24
-// Assignment 1 - Victor Liu (#A00971668, Set F)
+// Assignment 2 - Victor Liu (#A00971668, Set F)
 const express = require('express');
 const app = express();
 require('dotenv').config();
 const session = require('express-session');
 // const mongoose = require('mongoose');
-const usersModel = require('./models/w1users.js');
+const usersModel = require('./models/w2users.js');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
+const ejs = require('ejs');
+app.set('view engine', 'ejs');
 
 app.use(session({
     secret: process.env.NODE_SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: `mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@${process.env.ATLAS_DB_HOST}/?retryWrites=true&w=majority`,
+        // mongoUrl: `mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@${process.env.ATLAS_DB_HOST}/?retryWrites=true&w=majority`,
+        mongoUrl: `mongodb://127.0.0.1:27017/comp2537w2`,
         crypto: {
             secret: process.env.MONGO_SESSION_SECRET,
         },
@@ -220,6 +223,7 @@ app.post('/login', async (req, res) => {
         req.session.GLOBAL_AUTHENTICATED = true;
         req.session.loggedUsername = req.body.username;
         req.session.loggedPassword = userresult.password;
+        req.session.loggedType = userresult?.type;
         console.log("app.post(\'\/login\'): Current session cookie:", req.cookies)
         res.redirect('/protectedRoute');
     } else {
@@ -274,6 +278,7 @@ const authenticatedOnly = (req, res, next) => {
 // app.use(['/protectedRoute', '/protectedRouteForAdminsOnly'], authenticatedOnly);
 app.use('/protectedRoute', authenticatedOnly);
 app.get('/protectedRoute', async (req, res) => {
+    console.log("app.get(\'\/protectedRoute\'): Current session cookie-id:", req.cookies);
     const randomImageNumber = Math.floor(Math.random() * 3) + 1;
     const imageName = `00${randomImageNumber}.gif`;
     let checkUserType = await usersModel.findOne({
@@ -285,18 +290,25 @@ app.get('/protectedRoute', async (req, res) => {
     } else {
         var checkAdminA = ``
     }
+    res.render('protectedRoute.ejs', {
+        "username": req.session.loggedUsername,
+        "image": imageName,
+        "adminBtn": checkAdminA,
+        "isAdmin": checkUserType?.type,
+        // "todos": result.todos
+    })
 
-    let protectedRouteHTML = `
-        <code>app.get(\'\/protectedRoute\')</code>
-        <h1>Members Page - Logged In</h1>
-        <p>Welcome, <strong>${req.session.loggedUsername}</strong>! ${checkAdminA}</p>
-        <img src="/${imageName}" alt="random welcome image" />
-        <br />
-        <br />
-        <input type="button" value="Logout" onclick="window.location.href='/logout'" />
-        `;
-    console.log("app.get\'\/protectedRoute\': Current session cookie:", req.cookies)
-    res.send(protectedRouteHTML);
+    // let protectedRouteHTML = `
+    //     <code>app.get(\'\/protectedRoute\')</code>
+    //     <h1>Members Page - Logged In</h1>
+    //     <p>Welcome, <strong>${req.session.loggedUsername}</strong>! ${checkAdminA}</p>
+    //     <img src="/${imageName}" alt="random welcome image" />
+    //     <br />
+    //     <br />
+    //     <input type="button" value="Logout" onclick="window.location.href='/logout'" />
+    //     `;
+    // console.log("app.get\'\/protectedRoute\': Current session cookie:", req.cookies)
+    // res.send(protectedRouteHTML);
 });
 
 
@@ -338,12 +350,13 @@ app.get('/protectedRouteForAdminsOnly', (req, res) => {
 });
 
 
-app.use((req, res, next) => {
+app.get("*", (req, res) => {
     let errorHTML = `
         <h1>404: Sorry can't find that!</h1>
         <input type="button" value="Back" onclick="window.history.back()" />`
     res.status(404).send(errorHTML)
     console.log("404 Page: Current session cookie:", req.cookies);
 })
+
 
 module.exports = app;
