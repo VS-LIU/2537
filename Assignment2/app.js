@@ -188,6 +188,12 @@ app.get('/logout', function (req, res, next) {
     });
 })
 
+app.get('/notLoggedIn', (req, res) => {
+    console.log("app.get(\'\/notLoggedIn\'): Current session cookie-id:", req.cookies)
+    res.render('notLoggedIn.ejs')
+});
+
+
 const authenticatedOnly = (req, res, next) => {
     if (!req.session.GLOBAL_AUTHENTICATED) {
         res.redirect('/notLoggedIn')
@@ -210,12 +216,8 @@ const checkAccountType = async (req, res, next) => {
     }
 }
 
-app.use('/protectedRoute', authenticatedOnly, checkAccountType);
-app.get('/notLoggedIn', (req, res) => {
-    console.log("app.get(\'\/notLoggedIn\'): Current session cookie-id:", req.cookies)
-    res.render('notLoggedIn.ejs')
-});
 
+app.use('/protectedRoute', authenticatedOnly, checkAccountType);
 app.get('/protectedRoute', async (req, res) => {
     console.log("app.get(\'\/protectedRoute\'): Current session cookie-id:", req.cookies);
     const randomImageNumber = Math.floor(Math.random() * 3) + 1;
@@ -243,7 +245,7 @@ const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => 
             <button onclick="window.history.back()">Go Back</button>
             <br />
             `
-        res.send(nonAdminHTML);
+            res.status(404).send(nonAdminHTML);
     } else {
         res.redirect('/login');
     }
