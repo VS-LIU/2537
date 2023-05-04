@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const ejs = require('ejs');
+app.set('views', ___dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.use(session({
@@ -42,7 +43,7 @@ app.get(['/', '/home'], (req, res) => {
         res.redirect('/protectedRoute');
     } else {
         console.log("\'\/\', \'\/home\': Current session cookie:", req.cookies)
-        res.render('/index.ejs');
+        res.render('./index.ejs');
     }
 })
 
