@@ -42,7 +42,7 @@ app.get(['/', '/home'], (req, res) => {
         res.redirect('/protectedRoute');
     } else {
         console.log("\'\/\', \'\/home\': Current session cookie:", req.cookies)
-        res.render('./index.ejs');
+        res.render('/index.ejs');
     }
 })
 
