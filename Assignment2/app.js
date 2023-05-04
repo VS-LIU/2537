@@ -10,7 +10,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const ejs = require('ejs');
-app.set('views', ___dirname + '/views');
+app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.use(session({
