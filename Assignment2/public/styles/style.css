@@ -15,3 +15,7 @@ body {
     justify-content: flex-start;
     background-color: rgb(154, 208, 255);
 }
+
+.inline-flex {
+    display: flex;
+}
