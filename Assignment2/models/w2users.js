@@ -10,16 +10,6 @@ const usersSchema = new mongoose.Schema({
     },
     "password": String,
     "type": String,
-    "todos": [
-        {
-            "name": String,
-            // "done": Boolean
-            "done": {
-                type: Boolean,
-                default: false
-            }
-        }
-    ]
 });
 
 const usersModel = mongoose.model('w2user', usersSchema)
