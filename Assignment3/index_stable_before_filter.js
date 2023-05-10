@@ -48,96 +48,36 @@ const disableActivePage = (currentPage) => {
   currentSelected.setAttribute('disabled', true)
 }
 
+const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
+  selected_pokemons = pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
-const paginateFiltered = async (filteredList) => {
-  $('#pokeCards').empty()
-  for (const pokemon of filteredList) {
-    console.log("pokemonpaginateFiltered: ", pokemon);
-    const res = await axios.get(pokemon.url)
-    $('#pokeCards').append(`
-      <div class="pokeCard card" pokeName=${res.data.name}>
-        <h3>${res.data.name.toUpperCase()}</h3> 
-        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
-          More
-        </button>
-        </div>  
-        `)
-  }
-}
-
-
-
-const filterPage = async (pokemons) => {
-  // const filterPage = async (currentPage, PAGE_SIZE, pokemons) => {
-  const selectedTypes = []
-  const typeCheckboxes = document.querySelectorAll('.form-check-input')
-  typeCheckboxes.forEach((checkbox) => {
-    if (checkbox.checked) {
-      selectedTypes.push(checkbox.value)
-    }
-  })
-  console.log("selectedTypes: ", selectedTypes);
-  // paginate based on selected types
-  const filteredList = []
-  // only add pokemon to filteredList if it has a type that matches all selected types
-  for (const pokemon of pokemons) {
-    const res = await axios.get(pokemon.url)
-    const types = res.data.types.map((type) => type.type.name)
-    let addPokemon = true
-    selectedTypes.forEach((type) => {
-      if (!types.includes(type)) {
-        addPokemon = false
-      }
-    })
-    if (addPokemon) {
-      filteredList.push(pokemon)
-    }
-  }
-  console.log("filteredList: ", filteredList);
-
-  paginateFiltered(filteredList)
-}
-
-const populateTypes = (pokemons) => {
   $('#typeDiv').empty()
   const types = []
-  pokemons.forEach(async (pokemon) => {
+  selected_pokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url)
     // const types = res.data.types.map((type) => type.type.name)
+
     res.data.types.forEach((type) => {
       if (!types.includes(type.type.name)) {
-        let typeSelector;
         types.push(type.type.name)
         $('#typeDiv').append(`
         <li>
         <div class="form-check">
         <input class="form-check-input" type="checkbox" value="${type.type.name}" id="${type.type.name}">
         <label class="form-check-label" for="${type.type.name}">
-        ${type.type.name}
+          ${type.type.name}
         </label>
-        </div>
-        </li>
+      </div>
+      </li>
         `)
-        typeSelector = document.querySelector(`#${type.type.name}`)
-        typeSelector.addEventListener('change', () => { filterPage(pokemons) })
       }
     })
   })
-  console.log("types: ", types);
-}
-
-const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
-  selected_pokemons = await pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-
-  populateTypes(selected_pokemons);
-
-  // populate pokemon cards
   $('#pokeCards').empty()
   selected_pokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url)
     $('#pokeCards').append(`
-      <div class="pokeCard card" pokeName=${res.data.name}>
+      <div class="pokeCard card" pokeName=${res.data.name}   >
         <h3>${res.data.name.toUpperCase()}</h3> 
         <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
@@ -146,9 +86,12 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
         </div>  
         `)
   })
+
+
+
+
 }
 
-// Main function
 const setup = async () => {
   // test out poke api using axios here
 
@@ -159,8 +102,8 @@ const setup = async () => {
   pokemons = response.data.results;
 
 
-  const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   paginate(currentPage, PAGE_SIZE, pokemons)
+  const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   updatePaginationDiv(currentPage, numPages)
   disableActivePage(currentPage)
   disableNavigationButtons(currentPage, numPages)
@@ -238,8 +181,8 @@ const setup = async () => {
   $('body').on('click', ".nextBtn", async function (e) {
     if (currentPage < numPages) {
       currentPage += 1
-      updatePaginationDiv(currentPage, numPages)
       paginate(currentPage, PAGE_SIZE, pokemons)
+      updatePaginationDiv(currentPage, numPages)
       disableActivePage(currentPage)
       disableNavigationButtons(currentPage, numPages)
     }
