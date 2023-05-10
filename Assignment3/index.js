@@ -23,7 +23,7 @@ const updatePaginationDiv = (currentPage, numPages) => {
   // let endPage = numPages;
   for (let i = startPage; i <= endPage; i++) {
     $('#pagination').append(`
-    <button class="btn btn-primary page ml-1 numberedButtons" value="${i}">${i}</button>
+    <button class="btn btn-primary page ml-1 numberedButtons d-flex align-items-center justify-content-center" value="${i}">${i}</button>
     `)
   }
 }
@@ -106,7 +106,7 @@ const setup = async () => {
   const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   updatePaginationDiv(currentPage, numPages)
   disableActivePage(currentPage)
-
+  disableNavigationButtons(currentPage, numPages)
 
   // pop up modal when clicking on a pokemon card
   // add event listener to each pokemon card

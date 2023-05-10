@@ -58,6 +58,17 @@ main {
   background-color: var(--bs-tertiary-bg);
 }
 
+.numberedButtons,
+.prevBtn,
+.nextBtn {
+  width: 38px;
+  height: 38px;
+}
+
+.numberedButtons {
+  margin: 0 2px;
+}
+
 .scrollarea {
   overflow-y: auto;
 }
