@@ -26,12 +26,38 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
       <div class="pokeCard card" pokeName=${res.data.name}   >
         <h3>${res.data.name.toUpperCase()}</h3> 
         <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pokeModal">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
           More
         </button>
         </div>  
         `)
   })
+
+  $('#typeDiv').empty()
+  const types = []
+  selected_pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url)
+    // const types = res.data.types.map((type) => type.type.name)
+    
+    res.data.types.forEach((type) => {
+      if (!types.includes(type.type.name)) {
+        types.push(type.type.name)
+        $('#typeDiv').append(`
+        <li>
+        <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="${type.type.name}" id="${type.type.name}">
+        <label class="form-check-label" for="${type.type.name}">
+          ${type.type.name}
+        </label>
+      </div>
+      </li>
+        `)
+      }
+    })
+  })
+
+
+
 }
 
 const setup = async () => {
