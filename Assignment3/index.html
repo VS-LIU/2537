@@ -38,9 +38,9 @@
 </head>
 
 <body>
-  <div id="pagenav" class="d-flex align-items-center justify-content-center">
+  <div id="pagenav" class="d-flex align-items-center justify-content-center m-3">
     <div>
-      <button class="btn btn-outline-primary mx-1">
+      <button class="prevBtn btn btn-outline-primary mx-1" disabled>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
         </svg>
@@ -48,7 +48,7 @@
     </div>
     <div id="pagination"></div>
     <div>
-      <button class="btn btn-outline-primary mx-1">
+      <button class="nextBtn btn btn-outline-primary mx-1">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
         </svg>
@@ -58,15 +58,15 @@
   <!-- =================================== -->
   <div class="d-flex flex-nowrap">
     <div class="row">
-      <div class="col">
-        <div class="flex-shrink-0 p-3" style="width: 280px;">
+      <div class="col-2">
+        <div class="flex-shrink-0 p-3" style="width: 230px;">
           <a href="/" class="d-flex align-items-center pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom">
             <svg class="bi pe-none me-2" width="30" height="24">
               <use xlink:href="#bootstrap"></use>
             </svg>
             <span class="fs-5 fw-semibold">Home</span>
           </a>
-          <ul class="list-unstyled ps-0">
+          <ul class="list-unstyled ps-4">
             <li class="mb-1">
               <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
                 data-bs-toggle="collapse" data-bs-target="#type-collapse" aria-expanded="true">
@@ -77,7 +77,7 @@
                 </ul>
               </div>
             </li>
-            <li class="mb-1">
+            <!-- <li class="mb-1">
               <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0" data-bs-toggle="collapse"
                 data-bs-target="#dashboard-collapse" aria-expanded="true">
                 Dashboard
@@ -123,7 +123,7 @@
                   <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Sign out</a></li>
                 </ul>
               </div>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>

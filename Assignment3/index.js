@@ -10,11 +10,11 @@ const updatePaginationDiv = (currentPage, numPages) => {
   if (currentPage < 3) {
     startPage = 1;
     endPage = 5;
-  } 
+  }
   else if (currentPage + 2 > numPages) {
     startPage = numPages - 4;
     endPage = numPages;
-  } 
+  }
   else {
     startPage = currentPage - 2;
     endPage = currentPage + 2;
@@ -28,22 +28,28 @@ const updatePaginationDiv = (currentPage, numPages) => {
   }
 }
 
+const disableNavigationButtons = (currentPage, numPages) => {
+  if (currentPage === 1) {
+    $('.prevBtn').attr('disabled', true)
+  } else {
+    $('.prevBtn').attr('disabled', false)
+  }
+  if (currentPage === numPages) {
+    $('.nextBtn').attr('disabled', true)
+  } else {
+    $('.nextBtn').attr('disabled', false)
+  }
+}
+
+
+const disableActivePage = (currentPage) => {
+  let currentSelected = document.querySelector(`.numberedButtons[value="${currentPage}"]`)
+  currentSelected.classList.add('active')
+  currentSelected.setAttribute('disabled', true)
+}
+
 const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
   selected_pokemons = pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-
-  $('#pokeCards').empty()
-  selected_pokemons.forEach(async (pokemon) => {
-    const res = await axios.get(pokemon.url)
-    $('#pokeCards').append(`
-      <div class="pokeCard card" pokeName=${res.data.name}   >
-        <h3>${res.data.name.toUpperCase()}</h3> 
-        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
-          More
-        </button>
-        </div>  
-        `)
-  })
 
   $('#typeDiv').empty()
   const types = []
@@ -67,6 +73,20 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
       }
     })
   })
+  $('#pokeCards').empty()
+  selected_pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url)
+    $('#pokeCards').append(`
+      <div class="pokeCard card" pokeName=${res.data.name}   >
+        <h3>${res.data.name.toUpperCase()}</h3> 
+        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
+          More
+        </button>
+        </div>  
+        `)
+  })
+
 
 
 
@@ -85,7 +105,7 @@ const setup = async () => {
   paginate(currentPage, PAGE_SIZE, pokemons)
   const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   updatePaginationDiv(currentPage, numPages)
-
+  disableActivePage(currentPage)
 
 
   // pop up modal when clicking on a pokemon card
@@ -135,6 +155,37 @@ const setup = async () => {
 
     //update pagination buttons
     updatePaginationDiv(currentPage, numPages)
+    disableActivePage(currentPage)
+    disableNavigationButtons(currentPage, numPages)
+  })
+
+  // if (currentPage === 1) {
+  //   $('.prevBtn').attr('disabled', true)
+  // }
+  // if (currentPage === numPages) {
+  //   $('.nextBtn').attr('disabled', true)
+  // }
+
+
+  // add event listener to classes prevBtn and nextBtn
+  $('body').on('click', ".prevBtn", async function (e) {
+    if (currentPage > 1) {
+      currentPage -= 1
+      paginate(currentPage, PAGE_SIZE, pokemons)
+      updatePaginationDiv(currentPage, numPages)
+      disableActivePage(currentPage)
+      disableNavigationButtons(currentPage, numPages)
+    }
+  })
+
+  $('body').on('click', ".nextBtn", async function (e) {
+    if (currentPage < numPages) {
+      currentPage += 1
+      paginate(currentPage, PAGE_SIZE, pokemons)
+      updatePaginationDiv(currentPage, numPages)
+      disableActivePage(currentPage)
+      disableNavigationButtons(currentPage, numPages)
+    }
   })
 
 }
