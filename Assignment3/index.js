@@ -5,15 +5,27 @@ let pokemons = []
 
 const updatePaginationDiv = (currentPage, numPages) => {
   $('#pagination').empty()
-
-  const startPage = 1;
-  const endPage = numPages;
+  let startPage;
+  let endPage;
+  if (currentPage < 3) {
+    startPage = 1;
+    endPage = 5;
+  } 
+  else if (currentPage + 2 > numPages) {
+    startPage = numPages - 4;
+    endPage = numPages;
+  } 
+  else {
+    startPage = currentPage - 2;
+    endPage = currentPage + 2;
+  }
+  // let startPage = currentPage;
+  // let endPage = numPages;
   for (let i = startPage; i <= endPage; i++) {
     $('#pagination').append(`
     <button class="btn btn-primary page ml-1 numberedButtons" value="${i}">${i}</button>
     `)
   }
-
 }
 
 const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
@@ -38,7 +50,7 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
   selected_pokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url)
     // const types = res.data.types.map((type) => type.type.name)
-    
+
     res.data.types.forEach((type) => {
       if (!types.includes(type.type.name)) {
         types.push(type.type.name)
@@ -65,7 +77,8 @@ const setup = async () => {
 
 
   $('#pokeCards').empty()
-  let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+  // let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+  let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=1015');
   pokemons = response.data.results;
 
 
