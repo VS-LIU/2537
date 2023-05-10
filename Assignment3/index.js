@@ -43,7 +43,7 @@ const disableNavigationButtons = (currentPage, numPages) => {
 
 
 const disableActivePage = (currentPage) => {
-  let currentSelected = document.querySelector(`.numberedButtons[value="${currentPage}"]`)
+  const currentSelected = document.querySelector(`.numberedButtons[value="${currentPage}"]`)
   currentSelected.classList.add('active')
   currentSelected.setAttribute('disabled', true)
 }
