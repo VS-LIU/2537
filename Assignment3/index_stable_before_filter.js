@@ -2,7 +2,6 @@ const PAGE_SIZE = 10
 let currentPage = 1;
 let pokemons = []
 
-
 const updatePaginationDiv = (currentPage, numPages) => {
   $('#pagination').empty()
   let startPage;
@@ -40,7 +39,6 @@ const disableNavigationButtons = (currentPage, numPages) => {
     $('.nextBtn').attr('disabled', false)
   }
 }
-
 
 const disableActivePage = (currentPage) => {
   const currentSelected = document.querySelector(`.numberedButtons[value="${currentPage}"]`)
@@ -86,24 +84,16 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
         </div>  
         `)
   })
-
-
-
-
 }
 
 const setup = async () => {
-  // test out poke api using axios here
-
-
   $('#pokeCards').empty()
   // let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
   let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=1015');
   pokemons = response.data.results;
-
+  const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
 
   paginate(currentPage, PAGE_SIZE, pokemons)
-  const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   updatePaginationDiv(currentPage, numPages)
   disableActivePage(currentPage)
   disableNavigationButtons(currentPage, numPages)
@@ -126,21 +116,17 @@ const setup = async () => {
         ${res.data.abilities.map((ability) => `<li>${ability.ability.name}</li>`).join('')}
         </ul>
         </div>
-
         <div>
         <h3>Stats</h3>
         <ul>
         ${res.data.stats.map((stat) => `<li>${stat.stat.name}: ${stat.base_stat}</li>`).join('')}
         </ul>
-
         </div>
-
         </div>
           <h3>Types</h3>
           <ul>
           ${types.map((type) => `<li>${type}</li>`).join('')}
           </ul>
-      
         `)
     $('.modal-title').html(`
         <h2>${res.data.name.toUpperCase()}</h2>
@@ -158,14 +144,6 @@ const setup = async () => {
     disableActivePage(currentPage)
     disableNavigationButtons(currentPage, numPages)
   })
-
-  // if (currentPage === 1) {
-  //   $('.prevBtn').attr('disabled', true)
-  // }
-  // if (currentPage === numPages) {
-  //   $('.nextBtn').attr('disabled', true)
-  // }
-
 
   // add event listener to classes prevBtn and nextBtn
   $('body').on('click', ".prevBtn", async function (e) {

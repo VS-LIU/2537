@@ -48,7 +48,6 @@ const disableActivePage = (currentPage) => {
   currentSelected.setAttribute('disabled', true)
 }
 
-
 const paginateFiltered = async (filteredList) => {
   $('#pokeCards').empty()
   for (const pokemon of filteredList) {
@@ -151,8 +150,6 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
 // Main function
 const setup = async () => {
   // test out poke api using axios here
-
-
   $('#pokeCards').empty()
   // let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
   let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=1015');
@@ -215,14 +212,6 @@ const setup = async () => {
     disableActivePage(currentPage)
     disableNavigationButtons(currentPage, numPages)
   })
-
-  // if (currentPage === 1) {
-  //   $('.prevBtn').attr('disabled', true)
-  // }
-  // if (currentPage === numPages) {
-  //   $('.nextBtn').attr('disabled', true)
-  // }
-
 
   // add event listener to classes prevBtn and nextBtn
   $('body').on('click', ".prevBtn", async function (e) {
