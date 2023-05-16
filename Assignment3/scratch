@@ -1,0 +1,420 @@
+$('#pokeCards').empty()
+  for (const pokemon of filteredList) {
+    console.log("pokemonpaginateFiltered (current page): ", pokemon);
+    const res = await axios.get(pokemon.url)
+    $('#pokeCards').append(`
+      <div class="pokeCard card" pokeName=${res.data.name}>
+        <h3>${res.data.name.toUpperCase()}</h3> 
+        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
+          More
+        </button>
+        </div>  
+        `)
+  }
+
+  const PAGE_SIZE = 10
+let currentPage = 1;
+let pokemons = []
+
+
+const updatePaginationDiv = (currentPage, numPages) => {
+  $('#pagination').empty()
+  let startPage;
+  let endPage;
+  if (currentPage < 3) {
+    startPage = 1;
+    endPage = 5;
+  }
+  else if (currentPage + 2 > numPages) {
+    startPage = numPages - 4;
+    endPage = numPages;
+  }
+  else {
+    startPage = currentPage - 2;
+    endPage = currentPage + 2;
+  }
+  // let startPage = currentPage;
+  // let endPage = numPages;
+  for (let i = startPage; i <= endPage; i++) {
+    $('#pagination').append(`
+    <button class="btn btn-primary page ml-1 numberedButtons d-flex align-items-center justify-content-center" value="${i}">${i}</button>
+    `)
+  }
+}
+
+const updatePaginationDivFilter = (currentPage, numPages) => {
+  $('#pagination').empty()
+  // let startPage;
+  // let endPage;
+  // if (currentPage < 3) {
+  //   startPage = 1;
+  // }
+  // else if (currentPage + 2 > numPages) {
+  //   startPage = numPages - 4;
+  //   endPage = numPages;
+  // }
+  // else {
+    startPage = currentPage - 2;
+    endPage = currentPage + 2;
+  // }
+  // let startPage = currentPage;
+  // let endPage = numPages;
+  // for (let i = startPage; i <= endPage; i++) {
+  for (let i = currentPage; i <= numPages; i++) {
+    $('#pagination').append(`
+    <button class="btn btn-primary page ml-1 numberedButtons d-flex align-items-center justify-content-center" value="${i}">${i}</button>
+    `)
+  }
+}
+
+
+const disableNavigationButtons = (currentPage, numPages) => {
+  if (currentPage === 1) {
+    $('.prevBtn').attr('disabled', true)
+  } else {
+    $('.prevBtn').attr('disabled', false)
+  }
+  if (currentPage === numPages) {
+    $('.nextBtn').attr('disabled', true)
+  } else {
+    $('.nextBtn').attr('disabled', false)
+  }
+}
+
+const disableNavigationButtonsFilter = (currentPage, numPages) => {
+  if (currentPage === 1) {
+    $('.prevBtn').attr('disabled', true)
+  } else {
+    $('.prevBtn').attr('disabled', false)
+  }
+  if (currentPage === numPages) {
+    $('.nextBtn').attr('disabled', true)
+  } else {
+    $('.nextBtn').attr('disabled', false)
+  }
+}
+
+
+
+const disableActivePage = (currentPage) => {
+  const currentSelected = document.querySelector(`.numberedButtons[value="${currentPage}"]`)
+  currentSelected.classList.add('active')
+  currentSelected.setAttribute('disabled', true)
+}
+
+const disableActivePageFilter = (currentPage) => {
+  const currentSelected = document.querySelector(`.numberedButtons[value="${currentPage}"]`)
+  currentSelected.classList.add('active')
+  currentSelected.setAttribute('disabled', true)
+}
+
+
+const paginateFiltered = async (filteredList) => {
+  console.log("asdfasdfpaginateFiltered: ", filteredList)
+  console.log("asdfasdfpaginateFiltered: ", typeof filteredList)
+  console.log(filteredList)
+  // let rangeTenPokemons = filteredList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const numPages = Math.ceil(filteredList.length / PAGE_SIZE)
+  // if (numPages < 5) {
+  //   console.log("numPages is less than 5");
+  //   numPages = 5
+  // }
+  console.log("numPages: ", numPages);
+  console.log("currentPage: ", currentPage);
+  updatePaginationDivFilter(currentPage, numPages)
+  disableNavigationButtonsFilter(currentPage, numPages)
+  disableActivePageFilter(currentPage)
+  populatePage(filteredList, currentPage, numPages);
+  // $('#pokeCards').empty()
+  // for (const pokemon of filteredList) {
+  // // for (const pokemon of selected_pokemons) {
+  //   const res = await axios.get(pokemon.url)
+  //   $('#pokeCards').append(`
+  //     <div class="pokeCard card" pokeName=${res.data.name}>
+  //       <h3>${res.data.name.toUpperCase()}</h3>
+  //       <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
+  //       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
+  //         More
+  //       </button>
+  //       </div>
+  //       `)
+  // }
+  watchButtonsFilter(currentPage, numPages, filteredList, PAGE_SIZE)
+
+
+}
+
+
+const filterPage = async (pokemonsfilter) => {
+  // const filterPage = async (currentPage, PAGE_SIZE, pokemons) => {
+  const selectedTypes = []
+  console.log("pokemonsfilter: ", pokemonsfilter)
+  console.log("selectedTypes length: ", selectedTypes.length)
+  const filteredPageList = []
+  const typeCheckboxes = document.querySelectorAll('.form-check-input')
+  typeCheckboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+      selectedTypes.push(checkbox.value)
+    }
+  })
+  console.log("selectedTypes: ", selectedTypes);
+  // if no types are selected, show the default 10 pokemon:
+  if (selectedTypes.length === 0) {
+    console.log("yoyoyoyo: ", pokemons)
+    paginate(currentPage, PAGE_SIZE, pokemons)
+    return
+  }
+  // only add pokemon to filteredList if it has a type that matches all selected types
+  for (const pokemon of pokemonsfilter) {
+    const res = await axios.get(pokemon.url)
+    const types = res.data.types.map((type) => type.type.name)
+    let addPokemon = true
+    selectedTypes.forEach((type) => {
+      if (!types.includes(type)) {
+        addPokemon = false
+      }
+    })
+    if (addPokemon) {
+      filteredPageList.push(pokemon)
+    }
+  }
+  console.log("filteredList (current page): ", filteredPageList);
+  paginateFiltered(filteredPageList)
+}
+
+const populatePageTypes = (pokemons) => {
+  $('#typeDiv').empty()
+  const types = []
+  pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url)
+    // const types = res.data.types.map((type) => type.type.name)
+    res.data.types.forEach((type) => {
+      if (!types.includes(type.type.name)) {
+        let typeSelector;
+        types.push(type.type.name)
+        $('#typeDiv').append(`
+        <li>
+        <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="${type.type.name}" id="${type.type.name}">
+        <label class="form-check-label" for="${type.type.name}">
+        ${type.type.name}
+        </label>
+        </div>
+        </li>
+        `)
+        typeSelector = document.querySelector(`#${type.type.name}`)
+        typeSelector.addEventListener('change', () => { filterPage(pokemons) })
+      }
+    })
+  })
+  console.log("Current Page types: ", types);
+}
+
+const populatePage = async (currentPage, PAGE_SIZE, pokemons) => {
+  selected_pokemons = await pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  $('#pokeCards').empty()
+  selected_pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url)
+    $('#pokeCards').append(`
+      <div class="pokeCard card" pokeName=${res.data.name}>
+        <h3>${res.data.name.toUpperCase()}</h3> 
+        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
+          More
+        </button>
+        </div>  
+        `)
+  })
+}
+
+
+const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
+  selected_pokemons = await pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  // populatePageTypes(pokemons);
+  // populate pokemon cards
+  console.log("selected_pokemons: ", selected_pokemons)
+  console.log("selected_pokemons type: ", typeof selected_pokemons)
+  $('#pokeCards').empty()
+  selected_pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url)
+    $('#pokeCards').append(`
+      <div class="pokeCard card" pokeName=${res.data.name}>
+        <h3>${res.data.name.toUpperCase()}</h3> 
+        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pokeModal">
+          More
+        </button>
+        </div>  
+        `)
+  })
+}
+
+
+const watchButtons = (currentPage, numPages, pokemons, PAGE_SIZE) => {
+  // setup event listeners for pagination
+  $('body').on('click', ".numberedButtons", async function (e) {
+    currentPage = Number(e.target.value)
+    paginate(currentPage, PAGE_SIZE, pokemons)
+
+    //update pagination buttons
+    updatePaginationDiv(currentPage, numPages)
+    disableActivePage(currentPage)
+    disableNavigationButtons(currentPage, numPages)
+  })
+
+  // add event listener to classes prevBtn and nextBtn
+  $('body').on('click', ".prevBtn", async function (e) {
+    if (currentPage > 1) {
+      currentPage -= 1
+      paginate(currentPage, PAGE_SIZE, pokemons)
+      updatePaginationDiv(currentPage, numPages)
+      disableActivePage(currentPage)
+      disableNavigationButtons(currentPage, numPages)
+    }
+  })
+
+  $('body').on('click', ".nextBtn", async function (e) {
+    if (currentPage < numPages) {
+      currentPage += 1
+      
+      updatePaginationDiv(currentPage, numPages)
+      paginate(currentPage, PAGE_SIZE, pokemons)
+      disableActivePage(currentPage)
+      disableNavigationButtons(currentPage, numPages)
+    }
+  })
+
+}
+const watchButtonsFilter = (currentPage, numPages, pokemons, PAGE_SIZE) => {
+  // setup event listeners for pagination
+  $('body').on('click', ".numberedButtons", async function (e) {
+    currentPage = Number(e.target.value)
+    paginateFiltered(currentPage, PAGE_SIZE, pokemons)
+
+    //update pagination buttons
+    updatePaginationDivFilter(currentPage, numPages)
+    disableActivePageFilter(currentPage)
+    disableNavigationButtonsFilter(currentPage, numPages)
+  })
+
+  // add event listener to classes prevBtn and nextBtn
+  $('body').on('click', ".prevBtn", async function (e) {
+    if (currentPage > 1) {
+      currentPage -= 1
+      paginateFiltered(currentPage, PAGE_SIZE, pokemons)
+      updatePaginationDivFilter(currentPage, numPages)
+      disableActivePageFilter(currentPage)
+      disableNavigationButtonsFilter(currentPage, numPages)
+    }
+  })
+
+  $('body').on('click', ".nextBtn", async function (e) {
+    if (currentPage < numPages) {
+      currentPage += 1
+      
+      updatePaginationDivFilter(currentPage, numPages)
+      paginateFiltered(currentPage, PAGE_SIZE, pokemons)
+      disableActivePageFilter(currentPage)
+      disableNavigationButtonsFilter(currentPage, numPages)
+    }
+  })
+
+}
+
+
+
+// Main function
+const setup = async () => {
+  // test out poke api using axios here
+  $('#pokeCards').empty()
+  let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+  // let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=1015');
+  pokemons = response.data.results;
+
+
+  const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
+  paginate(currentPage, PAGE_SIZE, pokemons)
+  populatePageTypes(pokemons);
+  updatePaginationDiv(currentPage, numPages)
+  disableActivePage(currentPage)
+  disableNavigationButtons(currentPage, numPages)
+  watchButtons(currentPage, numPages, pokemons, PAGE_SIZE) 
+
+  // pop up modal when clicking on a pokemon card
+  // add event listener to each pokemon card
+  $('body').on('click', '.pokeCard', async function (e) {
+    const pokemonName = $(this).attr('pokeName')
+    // console.log("pokemonName: ", pokemonName);
+    const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)
+    // console.log("res.data: ", res.data);
+    const types = res.data.types.map((type) => type.type.name)
+    // console.log("types: ", types);
+    $('.modal-body').html(`
+        <div style="width:200px">
+        <img src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}"/>
+        <div>
+        <h3>Abilities</h3>
+        <ul>
+        ${res.data.abilities.map((ability) => `<li>${ability.ability.name}</li>`).join('')}
+        </ul>
+        </div>
+
+        <div>
+        <h3>Stats</h3>
+        <ul>
+        ${res.data.stats.map((stat) => `<li>${stat.stat.name}: ${stat.base_stat}</li>`).join('')}
+        </ul>
+
+        </div>
+
+        </div>
+          <h3>Types</h3>
+          <ul>
+          ${types.map((type) => `<li>${type}</li>`).join('')}
+          </ul>
+      
+        `)
+    $('.modal-title').html(`
+        <h2>${res.data.name.toUpperCase()}</h2>
+        <h5>${res.data.id}</h5>
+        `)
+  })
+
+  // // add event listener to pagination buttons
+  // $('body').on('click', ".numberedButtons", async function (e) {
+  //   currentPage = Number(e.target.value)
+  //   paginate(currentPage, PAGE_SIZE, pokemons)
+
+  //   //update pagination buttons
+  //   updatePaginationDiv(currentPage, numPages)
+  //   disableActivePage(currentPage)
+  //   disableNavigationButtons(currentPage, numPages)
+  // })
+
+  // // add event listener to classes prevBtn and nextBtn
+  // $('body').on('click', ".prevBtn", async function (e) {
+  //   if (currentPage > 1) {
+  //     currentPage -= 1
+  //     paginate(currentPage, PAGE_SIZE, pokemons)
+  //     updatePaginationDiv(currentPage, numPages)
+  //     disableActivePage(currentPage)
+  //     disableNavigationButtons(currentPage, numPages)
+  //   }
+  // })
+
+  // $('body').on('click', ".nextBtn", async function (e) {
+  //   if (currentPage < numPages) {
+  //     currentPage += 1
+      
+  //     updatePaginationDiv(currentPage, numPages)
+  //     paginate(currentPage, PAGE_SIZE, pokemons)
+  //     disableActivePage(currentPage)
+  //     disableNavigationButtons(currentPage, numPages)
+  //   }
+  // })
+
+}
+
+
+$(document).ready(setup)
