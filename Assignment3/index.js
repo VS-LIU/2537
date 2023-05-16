@@ -93,13 +93,24 @@ const disableActivePageFilter = (currentPage) => {
 }
 
 
+//display the current number of pokemons out of the total number of pokemons and insert into div #numberCounter
+const displayNumberCounter = (currentPage, PAGE_SIZE, pokemons) => {
+  let start = (currentPage - 1) * PAGE_SIZE + 1;
+  let end = currentPage * PAGE_SIZE;
+  if (end > pokemons.length) {
+    end = pokemons.length;
+  }
+  $('#numberCounter').text(`Showing ${start} - ${end} of ${pokemons.length} results`)
+}
 
 
 
 
 const populatePage = async (currentPage, PAGE_SIZE, pokemons) => {
+
   limit_ten_pokemons = await pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   console.log("limit_ten_pokemons: ", limit_ten_pokemons)
+  displayNumberCounter(currentPage, PAGE_SIZE, pokemons)
   $('#pokeCards').empty()
   limit_ten_pokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url)
@@ -306,6 +317,7 @@ const setup = async () => {
   const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   populateSidebarTypes(pokemons);
   paginate(currentPage, PAGE_SIZE, pokemons)
+  displayNumberCounter(currentPage, PAGE_SIZE, pokemons);
   updatePaginationDiv(currentPage, numPages)
   disableActivePage(currentPage)
   disableNavigationButtons(currentPage, numPages)
