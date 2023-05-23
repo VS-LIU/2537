@@ -77,7 +77,11 @@ const setDifficulty = () => {
 const resetGame = () => {
   // reset the timer to ""
   clearInterval(timer);
-  $("#timer").text("");
+  console.log(timer);
+  timer = null;
+  $("#timer").addClass("d-none");
+  console.log(timer);
+  $("#timer").html("");
   $("#clickCounter").text("");
   $("#cards").text("");
   // remove class selectedDifficulty from #easyBtn, #mediumBtn, #hardBtn
@@ -127,6 +131,7 @@ const startGame = () => {
     $("#game_grid").removeClass("d-none");
     $("#resetBtn").prop("disabled", false);
     $("#startBtn").prop("disabled", true);
+    $("#timer").removeClass("d-none");
     // if difficulty is easy
     if (difficulty === "easy") {
       //disable other difficulty buttons
@@ -156,6 +161,9 @@ const startGame = () => {
 const startHardTimer = () => {
   let time = 240;
   $("#timer").text(time);
+  if (timer !== null) {
+    clearInterval(timer);
+  }
   timer = setInterval(() => {
     time--;
     $("#timer").text(time);
@@ -170,6 +178,9 @@ const startHardTimer = () => {
 const startMediumTimer = () => {
   let time = 180;
   $("#timer").text(time);
+  if (timer !== null) {
+    clearInterval(timer);
+  }
   timer = setInterval(() => {
     time--;
     $("#timer").text(time);
@@ -184,6 +195,9 @@ const startMediumTimer = () => {
 const startEasyTimer = () => {
   let time = 120;
   $("#timer").text(time);
+  if (timer !== null) {
+    clearInterval(timer);
+  }
   timer = setInterval(() => {
     time--;
     $("#timer").text(time);
