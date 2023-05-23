@@ -1,0 +1,15 @@
+Victor Liu #A00971668, Set F
+
+COMP-2537 - Assignment #4 
+===============================
+
+[ ] Cards flip when clicked
+[ ] If the user clicks on the same card twice, do nothing.
+[ ] If the user clicks on a card that is already matched, do nothing.
+[ ] If the user clicks on a card while two cards are already flipped, do nothing.
+[ ] Winning Event is implemented. If user clicks on all the cards, display a winning message.
+[ ] Header is showing the number of clicks the user has made, and the number of pairs left, number of pairs matched, total number of pairs, and game timer.
+[ ] Start and Reset buttons are added to the game.
+[ ] Difficulty levels are added to the game.
+[ ] Themes are added to the game.
+[ ] Power-up logic is added to the game.
