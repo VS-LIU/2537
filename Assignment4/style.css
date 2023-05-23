@@ -16,6 +16,10 @@ body {
 }
 
 
+.d-none {
+  display: none;
+}
+
 .card {
   width: 33.3%;
   position: relative;
@@ -67,4 +71,6 @@ button.selectedDifficulty[disabled] {
   justify-content: space-between;
 }
 
-
+.matched {
+  border: 2px solid rgb(0, 203, 30);
+}

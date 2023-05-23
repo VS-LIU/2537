@@ -1,4 +1,29 @@
 
+
+
+checkWin = () => {
+  // jquery code to check if all cards have class "matched"
+  if ($(".matched").length === 6) {
+    // add modal on top of the page
+    //stop timer
+    timeElapsed = timeDifficulty - $("#timer").text();
+    clearInterval(timer);
+    setTimeout(() => {
+      $("#winModal").modal("toggle");
+      $(".modal-body").html(`You've matched all cards!<br>
+      Total time Elapsed: ${timeElapsed} seconds<br>
+      Total clicks: ${$("#clickCounter").text()}<br>`);
+    }, 100);
+  }
+};
+
+
+checkPairsCount = () => {
+  // $("#pairsRemaining").text(totalPairs - $(".matched").length);
+  $("#pairsRemaining").text(totalPairs);
+}
+
+
 // function to add CSS for selected difficulty
 const addClassSelectedDifficulty = (difficulty) => {
   if (difficulty === "easy") {
@@ -59,12 +84,21 @@ const resetGame = () => {
   $("#easyBtn").removeClass("selectedDifficulty");
   $("#mediumBtn").removeClass("selectedDifficulty");
   $("#hardBtn").removeClass("selectedDifficulty");
+  // toggle class flip for all cards
+  $(".card").removeClass("flip");
+  // remove class matched for all cards
+  $(".card").removeClass("border border-success border-4 matched");
+  // remove all previous event listeners
+  $(".card").off("click");
+  $("#game_grid").addClass("d-none");
+  setup();
+
 };
 
 
 
 const resetGameBtn = () => {
-  $("#resetBtn").on("click", () => {
+  $(".resetBtn").on("click", () => {
     // remove disabled attribute from #easyBtn, #mediumBtn, #hardBtn
     $("#easyBtn").prop("disabled", false);
     $("#mediumBtn").prop("disabled", false);
@@ -89,6 +123,8 @@ const clickCounter = () => {
 const startGame = () => {
   $("#startBtn").on("click", () => {
     clickCounter();
+    //show game grid
+    $("#game_grid").removeClass("d-none");
     $("#resetBtn").prop("disabled", false);
     $("#startBtn").prop("disabled", true);
     // if difficulty is easy
@@ -160,50 +196,80 @@ const startEasyTimer = () => {
 };
 
 const hardGame = () => {
+  timeDifficulty = 240;
+  totalPairs = 15;
+  $("#pairsRemaining").text(totalPairs);
   startHardTimer();
 };
 
 const mediumGame = () => {
+  timeDifficulty = 180;
+  totalPairs = 10;
+  $("#pairsRemaining").text(totalPairs);
   startMediumTimer();
 };
 
 const easyGame = () => {
+  timeDifficulty = 120;
+  totalPairs = 3;
+  console.log("totalPairs: ", totalPairs)
+  $("#pairsRemaining").text(totalPairs);
   startEasyTimer();
 };
+
 
 const setup = () => {
   let difficulty;
   let timer;
+  let timeDifficulty;
+  totalPairs = undefined;
   resetGameBtn();
   setDifficulty();
   startGame();
+  let canFlip = true;
   let firstCard = undefined
   let secondCard = undefined
   $(".card").on(("click"), function () {
+    if (!canFlip || $(this).hasClass("flip")) {
+      return; // Do nothing if flipping is not allowed or the card is already flipped
+    }
     $(this).toggleClass("flip");
 
-    if (!firstCard)
+    if (!firstCard) {
       firstCard = $(this).find(".front_face")[0]
-    else {
+      console.log("First card selected: ", firstCard);
+    } else {
+      // console.log("First card selected: ", firstCard);
       secondCard = $(this).find(".front_face")[0]
-      console.log(firstCard, secondCard);
-      if (
-        firstCard.src
-        ==
-        secondCard.src
-      ) {
-        console.log("match")
+      console.log("Second card selected: ", secondCard);
+      if (firstCard.src == secondCard.src) {
+        console.log(firstCard.src, "+", secondCard.src, "= Match!");
         $(`#${firstCard.id}`).parent().off("click")
         $(`#${secondCard.id}`).parent().off("click")
+        $(`#${firstCard.id}`).parent().addClass("border border-success border-4 matched")
+        $(`#${secondCard.id}`).parent().addClass("border border-success border-4 matched")
+        console.log("Total pairs remaining: ", totalPairs);
+        totalPairs--;
+        console.log("Total pairs remaining: ", totalPairs);
+        firstCard = undefined;
+        secondCard = undefined;
       } else {
-        console.log("no match")
+        console.log(firstCard.src, "+", secondCard.src, "= Not a match!");
+        canFlip = false;
         setTimeout(() => {
           $(`#${firstCard.id}`).parent().toggleClass("flip")
           $(`#${secondCard.id}`).parent().toggleClass("flip")
+          firstCard = undefined;
+          secondCard = undefined;
+          canFlip = true;
         }, 1000)
       }
+
+      checkPairsCount();
+      checkWin();
     }
   });
+
 }
 
 $(document).ready(setup)
