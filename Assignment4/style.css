@@ -1,3 +1,7 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0px;
 }
@@ -11,6 +15,10 @@ body {
   flex-wrap: wrap;
 }
 
+
+.d-none {
+  display: none;
+}
 
 .card {
   width: 33.3%;
@@ -39,4 +47,30 @@ img {
 
 .front_face {
   transform: rotateY(180deg);
+}
+
+.left-grow,
+.right-grow {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.margin-right {
+  margin-right: 2px;
+}
+
+
+button.selectedDifficulty:disabled,
+button.selectedDifficulty[disabled] {
+  border: 2px solid rgb(203, 30, 0);
+  background-color: #0d6dfd;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.matched {
+  border: 2px solid rgb(0, 203, 30);
 }
