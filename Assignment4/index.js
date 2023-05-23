@@ -1,35 +1,25 @@
 
-
-const addClassSelectedDifficulty = () => {
-  // if the button clicked was #easyBtn
+// function to add CSS for selected difficulty
+const addClassSelectedDifficulty = (difficulty) => {
   if (difficulty === "easy") {
-    // add class selectedDifficulty to #easyBtn
+    $("#mediumBtn").removeClass("selectedDifficulty");
+    $("#hardBtn").removeClass("selectedDifficulty");
     $("#easyBtn").addClass("selectedDifficulty");
-    // remove class selectedDifficulty from #mediumBtn and #hardBtn
-    $("#mediumBtn").removeClass("selectedDifficulty");
-    $("#hardBtn").removeClass("selectedDifficulty");
   }
-  // if the button clicked was #mediumBtn
   if (difficulty === "medium") {
-    // add class selectedDifficulty to #mediumBtn
-    $("#mediumBtn").addClass("selectedDifficulty");
-    // remove class selectedDifficulty from #easyBtn and #hardBtn
     $("#easyBtn").removeClass("selectedDifficulty");
     $("#hardBtn").removeClass("selectedDifficulty");
+    $("#mediumBtn").addClass("selectedDifficulty");
   }
-  // if the button clicked was #hardBtn
   if (difficulty === "hard") {
-    // add class selectedDifficulty to #hardBtn
-    $("#hardBtn").addClass("selectedDifficulty");
-    // remove class selectedDifficulty from #easyBtn and #mediumBtn
     $("#easyBtn").removeClass("selectedDifficulty");
     $("#mediumBtn").removeClass("selectedDifficulty");
+    $("#hardBtn").addClass("selectedDifficulty");
   }
 };
 
 
-
-// function to set difficulty
+// function to set difficulty level
 const setDifficulty = () => {
   $("#startBtn").prop("disabled", true);
   $("#easyBtn").on("click", () => {
@@ -37,7 +27,7 @@ const setDifficulty = () => {
     $("#mediumBtn").prop("disabled", false);
     $("#hardBtn").prop("disabled", false);
     $("#easyBtn").prop("disabled", true);
-    addClassSelectedDifficulty();
+    addClassSelectedDifficulty(difficulty);
     $("#startBtn").prop("disabled", false);
   });
   $("#mediumBtn").on("click", () => {
@@ -45,7 +35,7 @@ const setDifficulty = () => {
     $("#easyBtn").prop("disabled", false);
     $("#hardBtn").prop("disabled", false);
     $("#mediumBtn").prop("disabled", true);
-    addClassSelectedDifficulty();
+    addClassSelectedDifficulty(difficulty);
     $("#startBtn").prop("disabled", false);
   });
   $("#hardBtn").on("click", () => {
@@ -53,7 +43,7 @@ const setDifficulty = () => {
     $("#easyBtn").prop("disabled", false);
     $("#mediumBtn").prop("disabled", false);
     $("#hardBtn").prop("disabled", true);
-    addClassSelectedDifficulty();
+    addClassSelectedDifficulty(difficulty);
     $("#startBtn").prop("disabled", false);
   });
 };
@@ -63,10 +53,7 @@ const resetGame = () => {
   // reset the timer to ""
   clearInterval(timer);
   $("#timer").text("");
-  // stop the timer interval
-  // reset the score to ""
   $("#clickCounter").text("");
-  // reset the cards to ""
   $("#cards").text("");
   // remove class selectedDifficulty from #easyBtn, #mediumBtn, #hardBtn
   $("#easyBtn").removeClass("selectedDifficulty");
@@ -83,11 +70,7 @@ const resetGameBtn = () => {
     $("#mediumBtn").prop("disabled", false);
     $("#hardBtn").prop("disabled", false);
     resetGame();
-    // reset game
-    // reset timer
-    // reset score
-    // reset cards
-    // disable start button until user selects a difficulty
+
     $("#startBtn").prop("disabled", true);
   });
 };
@@ -101,7 +84,6 @@ const clickCounter = () => {
     $("#clickCounter").text(clicks);
   });
 };
-
 
 // function to start game
 const startGame = () => {
@@ -135,38 +117,7 @@ const startGame = () => {
   });
 };
 
-const startEasyTimer = () => {
-  // start timer for 2 minutes
-  let time = 120;
-  $("#timer").text(time);
-  timer = setInterval(() => {
-    time--;
-    $("#timer").text(time);
-    if (time === 0) {
-      clearInterval(timer);
-      alert("Game Over!");
-      resetGame();
-    }
-  }, 1000);
-};
-
-const startMediumTimer = () => {
-  // start timer for 3 minutes
-  let time = 180;
-  $("#timer").text(time);
-  timer = setInterval(() => {
-    time--;
-    $("#timer").text(time);
-    if (time === 0) {
-      clearInterval(timer);
-      alert("Game Over!");
-      resetGame();
-    }
-  }, 1000);
-};
-
 const startHardTimer = () => {
-  // start timer for 4 minutes
   let time = 240;
   $("#timer").text(time);
   timer = setInterval(() => {
@@ -180,31 +131,51 @@ const startHardTimer = () => {
   }, 1000);
 };
 
-
-const easyGame = () => {
-  // create array of 6 images
-  //start timer for 2 minutes
-  startEasyTimer();
+const startMediumTimer = () => {
+  let time = 180;
+  $("#timer").text(time);
+  timer = setInterval(() => {
+    time--;
+    $("#timer").text(time);
+    if (time === 0) {
+      clearInterval(timer);
+      alert("Game Over!");
+      resetGame();
+    }
+  }, 1000);
 };
 
-const mediumGame = () => {
-  // create array of 8 images
-  //start timer for 3 minutes
-  startMediumTimer();
+const startEasyTimer = () => {
+  let time = 120;
+  $("#timer").text(time);
+  timer = setInterval(() => {
+    time--;
+    $("#timer").text(time);
+    if (time === 0) {
+      clearInterval(timer);
+      alert("Game Over!");
+      resetGame();
+    }
+  }, 1000);
 };
 
 const hardGame = () => {
-  // create array of 10 images
-  //start timer for 4 minutes
   startHardTimer();
 };
 
+const mediumGame = () => {
+  startMediumTimer();
+};
+
+const easyGame = () => {
+  startEasyTimer();
+};
 
 const setup = () => {
   let difficulty;
   let timer;
-  setDifficulty();
   resetGameBtn();
+  setDifficulty();
   startGame();
   let firstCard = undefined
   let secondCard = undefined
