@@ -329,33 +329,6 @@ const easyGame = async (pokemons) => {
   $("#pairsRemaining").text(totalPairs);
   startEasyTimer();
 };
-// const easyGame = async (pokemons) => {
-//   timeDifficulty = 120;
-//   totalPairs = 3;
-//   console.log("totalPairs: ", totalPairs)
-//   const randomPokemons = _.sampleSize(pokemons, totalPairs);
-//   let cardID = 1;
-//   const cards = [];
-//   for (const pokemon of randomPokemons) {
-//   // randomPokemons.forEach(async (pokemon) => {
-//     const res = await axios.get(pokemon.url);
-//     for (let i = 0; i < 2; i++) {
-//       $("#game_grid").append(`
-//       <div class="card">
-//       <img id="${cardID}" class="front_face" src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}">
-//       <img class="back_face" src="back.webp" alt="">
-//       </div>
-//       `);
-//       $(".card").css("flex", "calc(100% / 3)");
-//       $(".card").css("max-width", "calc(100% / 3)");
-//       $(".card").css("padding-bottom", "315px");
-//       cardID++;
-//     }
-//   // });
-//   } 
-//   $("#pairsRemaining").text(totalPairs);
-//   startEasyTimer();
-// };
 
 const getPokemon = async () => {
   const response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
