@@ -1,16 +1,16 @@
-
-
-
 checkWin = () => {
-  // jquery code to check if all cards have class "matched"
-  if ($(".matched").length === 6) {
+  // if total pairs remaining is0
+  // add modal on top of the page
+  //stop timer
+
+  if ($("#pairsRemaining").text() === "0") {
     // add modal on top of the page
     //stop timer
     timeElapsed = timeDifficulty - $("#timer").text();
     clearInterval(timer);
     setTimeout(() => {
       $("#winModal").modal("toggle");
-      $(".modal-body").html(`You've matched all cards!<br>
+      $(".modal-body").html(`You've matched all the cards!<br>
       Total time Elapsed: ${timeElapsed} seconds<br>
       Total clicks: ${$("#clickCounter").text()}<br>`);
     }, 100);
@@ -95,9 +95,28 @@ const resetGame = () => {
   // remove all previous event listeners
   $(".card").off("click");
   $("#game_grid").addClass("d-none");
+  $("#game_grid").empty();
+  //turn off click for start button
+  $("#startBtn").off("click");
+  // turn off click for game grid
+  $("#game_grid").off("click");
   setup();
-
+  // newGame();
 };
+
+// const newGame = async () => {
+//   pokemons = await getPokemon();
+//   let difficulty;
+//   let timer;
+//   let timeDifficulty;
+//   let canFlip = true;
+//   let firstCard = undefined
+//   let secondCard = undefined
+//   totalPairs = undefined;
+//   resetGameBtn();
+//   setDifficulty();
+//   startGame(pokemons);
+// };
 
 
 
@@ -124,8 +143,8 @@ const clickCounter = () => {
 };
 
 // function to start game
-const startGame = () => {
-  $("#startBtn").on("click", () => {
+const startGame = async (pokemons) => {
+  $("#startBtn").on("click", async () => {
     clickCounter();
     //show game grid
     $("#game_grid").removeClass("d-none");
@@ -138,7 +157,8 @@ const startGame = () => {
       $("#mediumBtn").prop("disabled", true);
       $("#hardBtn").prop("disabled", true);
       // start easy game
-      easyGame();
+      await easyGame(pokemons);
+      addClickEventToCards();
     }
     // if difficulty is medium
     if (difficulty === "medium") {
@@ -146,14 +166,16 @@ const startGame = () => {
       $("#hardBtn").prop("disabled", true);
 
       // start medium game
-      mediumGame();
+      await mediumGame(pokemons);
+      addClickEventToCards();
     }
     // if difficulty is hard
     if (difficulty === "hard") {
       $("#easyBtn").prop("disabled", true);
       $("#mediumBtn").prop("disabled", true);
       // start hard game
-      hardGame();
+      await hardGame(pokemons);
+      addClickEventToCards();
     }
   });
 };
@@ -209,41 +231,159 @@ const startEasyTimer = () => {
   }, 1000);
 };
 
-const hardGame = () => {
+const hardGame = async (pokemons) => {
   timeDifficulty = 240;
   totalPairs = 15;
+  //grab 15 random pokemons from pokemons 
+  const randomPokemons = _.sampleSize(pokemons, totalPairs);
+  let cardID = 1;
+  for (const pokemon of randomPokemons) {
+    // randomPokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url);
+    for (let i = 0; i < 2; i++) {
+      $("#game_grid").append(`
+      <div class="card">
+      <img id="${cardID}" class="front_face" src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}">
+      <img class="back_face" src="back.webp" alt="">
+      </div>
+      `);
+      $(".card").css("flex", "calc(100% / 6)");
+      $(".card").css("max-width", "calc(100% / 6)");
+      $(".card").css("padding-bottom", "170px");
+      cardID++;
+    }
+    // });
+  }
   $("#pairsRemaining").text(totalPairs);
   startHardTimer();
 };
 
-const mediumGame = () => {
+const mediumGame = async (pokemons) => {
+  // change the flex and max-width css property of .card
+
   timeDifficulty = 180;
   totalPairs = 10;
+  console.log("asdfasdftotalPairs: ", totalPairs)
+  const randomPokemons = _.sampleSize(pokemons, totalPairs);
+  let cardID = 1;
+  const cards = [];
+  for (const pokemon of randomPokemons) {
+    // randomPokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url);
+    for (let i = 0; i < 2; i++) {
+      const cardElement = `
+      <div class="card">
+      <img id="${cardID}" class="front_face" src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}">
+      <img class="back_face" src="back.webp" alt="">
+      </div>
+      `;
+
+      cards.push(cardElement);
+      cardID++;
+    }
+    // });
+  }
+
+  const shuffledCards = _.shuffle(cards);
+  for (const card of shuffledCards) {
+    $("#game_grid").append(card);
+    $(".card").css("flex", "calc(100% / 5)");
+    $(".card").css("max-width", "calc(100% / 5)");
+    $(".card").css("padding-bottom", "190px");
+  }
   $("#pairsRemaining").text(totalPairs);
   startMediumTimer();
 };
 
-const easyGame = () => {
+const easyGame = async (pokemons) => {
   timeDifficulty = 120;
   totalPairs = 3;
-  console.log("totalPairs: ", totalPairs)
+  console.log("asdfasdftotalPairs: ", totalPairs)
+  const randomPokemons = _.sampleSize(pokemons, totalPairs);
+  let cardID = 1;
+  const cards = [];
+  for (const pokemon of randomPokemons) {
+    // randomPokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url);
+    for (let i = 0; i < 2; i++) {
+      const cardElement = `
+      <div class="card">
+      <img id="${cardID}" class="front_face" src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}">
+      <img class="back_face" src="back.webp" alt="">
+      </div>
+      `;
+
+      cards.push(cardElement);
+      cardID++;
+    }
+    // });
+  }
+
+  const shuffledCards = _.shuffle(cards);
+  for (const card of shuffledCards) {
+    $("#game_grid").append(card);
+    $(".card").css("flex", "calc(100% / 3)");
+    $(".card").css("max-width", "calc(100% / 3)");
+    $(".card").css("padding-bottom", "315px");
+  }
+
+
+
   $("#pairsRemaining").text(totalPairs);
   startEasyTimer();
 };
+// const easyGame = async (pokemons) => {
+//   timeDifficulty = 120;
+//   totalPairs = 3;
+//   console.log("totalPairs: ", totalPairs)
+//   const randomPokemons = _.sampleSize(pokemons, totalPairs);
+//   let cardID = 1;
+//   const cards = [];
+//   for (const pokemon of randomPokemons) {
+//   // randomPokemons.forEach(async (pokemon) => {
+//     const res = await axios.get(pokemon.url);
+//     for (let i = 0; i < 2; i++) {
+//       $("#game_grid").append(`
+//       <div class="card">
+//       <img id="${cardID}" class="front_face" src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}">
+//       <img class="back_face" src="back.webp" alt="">
+//       </div>
+//       `);
+//       $(".card").css("flex", "calc(100% / 3)");
+//       $(".card").css("max-width", "calc(100% / 3)");
+//       $(".card").css("padding-bottom", "315px");
+//       cardID++;
+//     }
+//   // });
+//   } 
+//   $("#pairsRemaining").text(totalPairs);
+//   startEasyTimer();
+// };
+
+const getPokemon = async () => {
+  const response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+  const pokemons = response.data.results;
+  return pokemons
+};
+
+const helpBtn = () => {
+  $("#helpBtn").on("click", function () {
+    // for every card in the game grid, add a class of flip
+    $(".card").addClass("flip");
+    setTimeout(() => {
+      // if the card does not have a class of match, remove the class of flip
+      $(".card").not(".match").removeClass("flip");
+    }, 500);
+  });
+};
 
 
-const setup = () => {
-  let difficulty;
-  let timer;
-  let timeDifficulty;
-  totalPairs = undefined;
-  resetGameBtn();
-  setDifficulty();
-  startGame();
+const addClickEventToCards = () => {
   let canFlip = true;
   let firstCard = undefined
   let secondCard = undefined
-  $(".card").on(("click"), function () {
+  $("#game_grid").on("click", ".card", function () {
+    // $(".card").on("click", function () {
     if (!canFlip || $(this).hasClass("flip")) {
       return; // Do nothing if flipping is not allowed or the card is already flipped
     }
@@ -283,6 +423,24 @@ const setup = () => {
       checkWin();
     }
   });
+
+};
+
+
+const setup = async () => {
+  let pokemons = [];
+  pokemons = await getPokemon();
+  let difficulty;
+  let timer;
+  let timeDifficulty;
+  let canFlip = true;
+  let firstCard = undefined
+  let secondCard = undefined
+  totalPairs = undefined;
+  resetGameBtn();
+  setDifficulty();
+  helpBtn();
+  await startGame(pokemons);
 
 }
 
