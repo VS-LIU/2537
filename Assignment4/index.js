@@ -21,6 +21,7 @@ checkWin = () => {
 checkPairsCount = () => {
   // $("#pairsRemaining").text(totalPairs - $(".matched").length);
   $("#pairsRemaining").text(totalPairs);
+  $("#pairsMatched").text(pairsMatchedCount);
 }
 
 
@@ -84,6 +85,8 @@ const resetGame = () => {
   $("#timer").html("");
   $("#clickCounter").text("");
   $("#cards").text("");
+  $("#pairsRemaining").text("");
+  $("#pairsMatched").text("");
   // remove class selectedDifficulty from #easyBtn, #mediumBtn, #hardBtn
   $("#easyBtn").removeClass("selectedDifficulty");
   $("#mediumBtn").removeClass("selectedDifficulty");
@@ -104,22 +107,6 @@ const resetGame = () => {
   // newGame();
 };
 
-// const newGame = async () => {
-//   pokemons = await getPokemon();
-//   let difficulty;
-//   let timer;
-//   let timeDifficulty;
-//   let canFlip = true;
-//   let firstCard = undefined
-//   let secondCard = undefined
-//   totalPairs = undefined;
-//   resetGameBtn();
-//   setDifficulty();
-//   startGame(pokemons);
-// };
-
-
-
 const resetGameBtn = () => {
   $(".resetBtn").on("click", () => {
     // remove disabled attribute from #easyBtn, #mediumBtn, #hardBtn
@@ -136,7 +123,8 @@ const resetGameBtn = () => {
 const clickCounter = () => {
   // count the number of clicks
   let clicks = 0;
-  $(".card").on("click", () => {
+  // $(".card").on("click", () => {
+  $("#game_grid").on("click", ".card", () => {
     clicks++;
     $("#clickCounter").text(clicks);
   });
@@ -145,6 +133,7 @@ const clickCounter = () => {
 // function to start game
 const startGame = async (pokemons) => {
   $("#startBtn").on("click", async () => {
+    pairsMatchedCount = 0;
     clickCounter();
     //show game grid
     $("#game_grid").removeClass("d-none");
@@ -237,22 +226,30 @@ const hardGame = async (pokemons) => {
   //grab 15 random pokemons from pokemons 
   const randomPokemons = _.sampleSize(pokemons, totalPairs);
   let cardID = 1;
+  const cards = [];
   for (const pokemon of randomPokemons) {
     // randomPokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url);
     for (let i = 0; i < 2; i++) {
-      $("#game_grid").append(`
+      const cardElement = `
       <div class="card">
       <img id="${cardID}" class="front_face" src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}">
       <img class="back_face" src="back.webp" alt="">
       </div>
-      `);
-      $(".card").css("flex", "calc(100% / 6)");
-      $(".card").css("max-width", "calc(100% / 6)");
-      $(".card").css("padding-bottom", "170px");
+      `;
+
+      cards.push(cardElement);
       cardID++;
     }
     // });
+  }
+
+  const shuffledCards = _.shuffle(cards);
+  for (const card of shuffledCards) {
+    $("#game_grid").append(card);
+    $(".card").css("flex", "calc(100% / 6)");
+    $(".card").css("max-width", "calc(100% / 6)");
+    $(".card").css("padding-bottom", "170px");
   }
   $("#pairsRemaining").text(totalPairs);
   startHardTimer();
@@ -369,10 +366,10 @@ const getPokemon = async () => {
 const helpBtn = () => {
   $("#helpBtn").on("click", function () {
     // for every card in the game grid, add a class of flip
-    $(".card").addClass("flip");
+    $(".card").not(".matched").addClass("flip");
     setTimeout(() => {
       // if the card does not have a class of match, remove the class of flip
-      $(".card").not(".match").removeClass("flip");
+      $(".card").not(".matched").removeClass("flip");
     }, 500);
   });
 };
@@ -404,6 +401,7 @@ const addClickEventToCards = () => {
         $(`#${secondCard.id}`).parent().addClass("border border-success border-4 matched")
         console.log("Total pairs remaining: ", totalPairs);
         totalPairs--;
+        pairsMatchedCount++;
         console.log("Total pairs remaining: ", totalPairs);
         firstCard = undefined;
         secondCard = undefined;
@@ -437,6 +435,7 @@ const setup = async () => {
   let firstCard = undefined
   let secondCard = undefined
   totalPairs = undefined;
+  pairsMatchedCount = undefined;
   resetGameBtn();
   setDifficulty();
   helpBtn();
